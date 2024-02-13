@@ -1,6 +1,7 @@
-using WebShop.Models;
+using WebShop.Others;
 using WebShop.Others.Daos.Storage;
-using WebShop.Others.Storage;
+using WebShop.Others.Daos;
+using WebShop.Others.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,8 +10,14 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IProductDao, ProductStorage>();
 builder.Services.AddSingleton<ICategoryDao, CategoryStorage>();
 builder.Services.AddSingleton<ISupplierDao, SupplierStorage>();
+builder.Services.AddSingleton<IWebShopService, WebShopService>();
+builder.Services.AddSingleton<DataGenerator>();
 
 var app = builder.Build();
+
+// Get an instance of DataGenerator from the DI container
+var dataGenerator= app.Services.GetRequiredService<DataGenerator>();
+dataGenerator.Populate();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

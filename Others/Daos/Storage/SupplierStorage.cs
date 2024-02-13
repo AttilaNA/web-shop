@@ -1,15 +1,19 @@
 using WebShop.Models;
-using WebShop.Others.Storage;
 
 namespace WebShop.Others.Daos.Storage;
 
 public class SupplierStorage : ISupplierDao
 {
-    private List<Supplier> Suppliers { get; set; } = new List<Supplier>();
+    private List<Supplier> Suppliers { get; set; }
+
+    public SupplierStorage()
+    {
+        Suppliers = new List<Supplier>();
+    }
 
     public void Add(Supplier item)
     {
-        throw new NotImplementedException();
+        Suppliers.Add(item);
     }
 
     public void Remove(int id)

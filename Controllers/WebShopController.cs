@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using WebShop.Models;
+using WebShop.Others.Services;
 
 namespace WebShop.Controllers;
 
@@ -8,14 +9,18 @@ public class WebShopController : Controller
 {
     private readonly ILogger<WebShopController> _logger;
 
-    public WebShopController(ILogger<WebShopController> logger)
+    private readonly IWebShopService _webShopService;
+
+    public WebShopController(ILogger<WebShopController> logger, IWebShopService webShopService)
     {
         _logger = logger;
+        _webShopService = webShopService;
     }
 
     public IActionResult Index()
     {
-        return View();
+        var products = _webShopService.GetProductsForCategory(1);
+        return View(products.ToList());
     }
 
     public IActionResult Privacy()
