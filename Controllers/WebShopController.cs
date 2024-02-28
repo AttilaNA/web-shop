@@ -11,14 +11,19 @@ public class WebShopController : Controller
 
     private readonly IWebShopService _webShopService;
 
-    public WebShopController(ILogger<WebShopController> logger, IWebShopService webShopService)
+    private readonly ICartOfUserService _cartOfUserService;
+
+    public WebShopController(ILogger<WebShopController> logger, IWebShopService webShopService, ICartOfUserService cartOfUserService)
     {
         _logger = logger;
         _webShopService = webShopService;
+        _cartOfUserService = cartOfUserService;
     }
     
     public IActionResult Index(int? id, string filter)
     {
+        SetUserInCookiesIfNecessary();
+        
         if (id == null)
         {
             var products = _webShopService.GetProducts();
@@ -34,7 +39,18 @@ public class WebShopController : Controller
         var productsByCategory = _webShopService.GetProductsForCategory((int)id);
         return View(productsByCategory.ToList());
     }
-    
+
+    private void SetUserInCookiesIfNecessary()
+    {
+        var cookies = Request.Cookies;
+        var user = cookies["user"];
+        if (user == null)
+        {
+            var newUser = _cartOfUserService.GetNewUser();
+            Response.Cookies.Append("user", newUser.Id.ToString());
+        }
+    }
+
     public IActionResult Privacy()
     {
         return View();
@@ -45,4 +61,13 @@ public class WebShopController : Controller
     {
         return View(new Error { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
+
+    
+    [HttpPost]
+    public async Task<ActionResult> AddToCart(Product productFormWithId)
+    {
+        var product = _webShopService.GetProductById(productFormWithId.Id);
+        _cartOfUserService.AddToCart(product, int.Parse(Request.Cookies["user"]));
+        return RedirectToAction(nameof(Index));
+    }   
 }
