@@ -76,12 +76,52 @@ public class WebShopController : Controller
         return View(new Error { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }
 
-    
-    [HttpPost]
-    public async Task<ActionResult> AddToCart(Product productFormWithId)
+    public async Task<ActionResult> AddToCart(int id)
     {
-        var product = _webShopService.GetProductById(productFormWithId.Id);
+        var product = _webShopService.GetProductById(id);
         _cartOfUserService.AddToCart(product, int.Parse(Request.Cookies["user"]));
         return RedirectToAction(nameof(Index));
-    }   
+    }
+
+    public IActionResult CheckOutCart()
+    {
+        var userId = Request.Cookies["user"];
+
+        // Only allow the normal flow further if userId in not null
+        // Otherwise 'ArgumentNullException: Parameter value cannot be null' exeption occure
+        if (userId == null)
+        {
+            return RedirectToAction(nameof(Index));
+        }
+
+        var userCart = _cartOfUserService.GetCartByUserId(int.Parse(userId));
+        return View(userCart);
+    }
+
+    public IActionResult IncrementProduct(int id)
+    {
+        var product = _webShopService.GetProductById(id);
+        var userId = int.Parse(Request.Cookies["user"]);
+        _cartOfUserService.AddToCart(product, userId);
+        var userCart = _cartOfUserService.GetCartByUserId(userId);
+        return View("CheckOutCart", userCart);
+    }
+
+    public IActionResult DecrementProduct(int id)
+    {
+        var product = _webShopService.GetProductById(id);
+        var userId = int.Parse(Request.Cookies["user"]);
+        _cartOfUserService.RemoveFromCart(product, userId);
+        var userCart = _cartOfUserService.GetCartByUserId(userId);
+        return View("CheckOutCart", userCart);
+    }
+
+    public IActionResult RemoveProductFromCart(int id)
+    {
+        var product = _webShopService.GetProductById(id);
+        var userId = int.Parse(Request.Cookies["user"]);
+        _cartOfUserService.RemoveAllProductsFromCart(product, userId);
+        var userCart = _cartOfUserService.GetCartByUserId(userId);
+        return View("CheckOutCart", userCart);
+    }
 }

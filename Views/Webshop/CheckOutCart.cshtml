@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "Cart";
+}
+@model Cart
+
+<div class="container" style="display: flex; flex-wrap: wrap;">
+    @{
+        Dictionary<Product, int> products = new Dictionary<Product, int>();
+            foreach (var product in Model.Products)
+            {
+                var value = -1;
+                products.TryGetValue(product, out value);
+                if (value == -1)
+                {
+                    products.Add(product, 1);
+                } else
+                {
+                    products[product] = value + 1;
+                }
+            }
+
+        decimal total = 0;
+    }
+    <div style="display: flex; flex-direction: column;">
+        @foreach ( KeyValuePair<Product, int> kvp in products)
+            {
+                <div class="card">
+                    <div style="display: flex; align-items: center; padding-top: 10px;">
+                        <h5 style="margin-bottom: unset; padding-left: 10px">Product @(kvp.Key.Id): @kvp.Key.Name</h5>
+                        <div style="padding: 0 10px 0 10px;">
+                            <a type="button" class="btn btn-danger" asp-controller="WebShop" asp-action="RemoveProductFromCart" asp-route-id="@kvp.Key.Id">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47M8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5"/>
+                                </svg>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-in-cart" style="padding-top: 10px;">
+                        <div style="padding-left: 10px;">
+                            <p>Category: @kvp.Key.Category.Department</p>
+                            <p>Supplier: @kvp.Key.Supplier.Name</p>
+                            <p>Unit price: @kvp.Key.DefaultPrice.ToString("C2")</p>
+                            <div style="margin-bottom: 16px;">
+                                <span>Quantity: </span>
+                                <span>
+                                    <a type="button" class="btn btn-primary" asp-controller="WebShop" asp-action="DecrementProduct" asp-route-id="@kvp.Key.Id">-</a>
+                                    <span>@kvp.Value</span>
+                                    <a type="button" class="btn btn-primary" asp-controller="WebShop" asp-action="IncrementProduct" asp-route-id="@kvp.Key.Id">+</a>
+                                </span>
+                            </div>
+                            <div style="margin-bottom: 16px;">
+                                <span><strong>Subtotal: </strong></span>
+                                <span><strong>@((kvp.Key.DefaultPrice * kvp.Value).ToString("C2"))</strong></span>
+                            </div>
+                        </div>      
+                        <img src="~/img/@(kvp.Key.Name).jpg" style="padding: 0 10px 0 10px;">
+                    </div>
+                </div>
+                total += kvp.Key.DefaultPrice * kvp.Value;
+            }
+    </div>
+    <div style="display: flex; flex-direction: column; padding-left: 50px">
+        <div class="card" style="padding: 0 10px 0 10px; position: sticky; top: 116px">
+            <h1><strong>Summary</strong></h1>
+            @{
+                int sum = 0;
+                foreach ( KeyValuePair<Product, int> kvp in products)
+                {
+                    <p>@(kvp.Key.Name): @kvp.Value piece(s)</p>
+                    sum += kvp.Value;
+                }
+                <h5><strong>Total: @(total.ToString("C2")) (Items: @sum)</strong></h5>
+            }
+        </div>
+    </div>
+</div>

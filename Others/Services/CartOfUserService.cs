@@ -56,11 +56,6 @@ namespace WebShop.Others.Services
             return _userStorage.GetAll().OrderByDescending(x => x.Id).First();
         }
 
-        public void AddProduct(Product product, User user)
-        {
-            throw new NotImplementedException();
-        }
-
         public User GetUserById(int id)
         {
             return _userStorage.Get(id);
@@ -70,6 +65,18 @@ namespace WebShop.Others.Services
         {
             var cart = _cartStorage.GetCartByUserId(userId);
             cart.Products.Add(product);
+        }
+
+        public void RemoveFromCart(Product product, int userId)
+        {
+            var cart = _cartStorage.GetCartByUserId(userId);
+            cart.Products.Remove(product);
+        }
+
+        public void RemoveAllProductsFromCart(Product product, int userId)
+        {
+            var cart = _cartStorage.GetCartByUserId(userId);
+            cart.Products.RemoveAll(x => x == product);
         }
 
         public IEnumerable<Cart> GetAllCarts()
@@ -86,5 +93,6 @@ namespace WebShop.Others.Services
         {
             return _cartStorage.GetCartByUserId(id);
         }
+
     }
 }
